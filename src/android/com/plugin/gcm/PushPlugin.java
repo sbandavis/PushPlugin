@@ -24,6 +24,7 @@ public class PushPlugin extends CordovaPlugin {
 
 	public static final String REGISTER = "register";
 	public static final String UNREGISTER = "unregister";
+	public static final String SETECB = "setECB";
 	public static final String EXIT = "exit";
 
 	private static CordovaWebView gWebView;
@@ -47,7 +48,7 @@ public class PushPlugin extends CordovaPlugin {
 
 		Log.v(TAG, "execute: action=" + action);
 
-		if (REGISTER.equals(action)) {
+		if (REGISTER.equals(action) || SETECB.equals(action)) {
 
 			Log.v(TAG, "execute: data=" + data.toString());
 
@@ -62,7 +63,9 @@ public class PushPlugin extends CordovaPlugin {
 
 				Log.v(TAG, "execute: ECB=" + gECB + " senderID=" + gSenderID);
 
-				GCMRegistrar.register(getApplicationContext(), gSenderID);
+				if (REGISTER.equals(action)) {
+					GCMRegistrar.register(getApplicationContext(), gSenderID);
+				}
 				result = true;
 				callbackContext.success();
 			} catch (JSONException e) {
@@ -122,116 +125,116 @@ public class PushPlugin extends CordovaPlugin {
 		}
 	}
 
-    @Override
-    public void initialize(CordovaInterface cordova, CordovaWebView webView) {
-      super.initialize(cordova, webView);
-      Log.v(TAG, "initialize: initialize was fired");
-      pushCachedExtras();
-      gForeground = true;
+  @Override
+  public void initialize(CordovaInterface cordova, CordovaWebView webView) {
+    super.initialize(cordova, webView);
+    Log.v(TAG, "initialize: initialize was fired");
+    pushCachedExtras();
+    gForeground = true;
+  }
+
+  @Override
+  public void onPause(boolean multitasking) {
+    super.onPause(multitasking);
+    Log.v(TAG, "onPause: pause was fired");
+    gForeground = false;
+    //final NotificationManager notificationManager = (NotificationManager) cordova.getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+    //notificationManager.cancelAll();
+  }
+
+  @Override
+  public void onResume(boolean multitasking) {
+    Log.v(TAG, "onResume: resume was fired");
+    super.onResume(multitasking);
+    pushCachedExtras();
+    gForeground = true;
+  }
+
+  @Override
+  public void onDestroy() {
+    super.onDestroy();
+    Log.v(TAG, "onDestroy: destroy was fired");
+    gForeground = false;
+    gWebView = null;
+    gECB = null;
+  }
+
+  private void pushCachedExtras() {
+    if ( gCachedExtras != null) {
+      Log.v(TAG, "pushCachedExtras: cached extras were pushed");
+      sendExtras(gCachedExtras);
     }
+  }
 
-	@Override
-    public void onPause(boolean multitasking) {
-      super.onPause(multitasking);
-      Log.v(TAG, "onPause: pause was fired");
-      gForeground = false;
-      //final NotificationManager notificationManager = (NotificationManager) cordova.getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-      //notificationManager.cancelAll();
-    }
+  /*
+   * serializes a bundle to JSON.
+   */
+  private static JSONObject convertBundleToJson(Bundle extras) {
+	try {
+		JSONObject json;
+		json = new JSONObject().put("event", "message");
 
-    @Override
-    public void onResume(boolean multitasking) {
-      Log.v(TAG, "onResume: resume was fired");
-      super.onResume(multitasking);
-      pushCachedExtras();
-      gForeground = true;
-    }
+		JSONObject jsondata = new JSONObject();
+		Iterator<String> it = extras.keySet().iterator();
+		while (it.hasNext()) {
+			String key = it.next();
+			Object value = extras.get(key);
 
-    @Override
-    public void onDestroy() {
-      super.onDestroy();
-      Log.v(TAG, "onDestroy: destroy was fired");
-      gForeground = false;
-      gECB = null;
-      gWebView = null;
-    }
-
-    private void pushCachedExtras() {
-      if ( gCachedExtras != null) {
-        Log.v(TAG, "pushCachedExtras: cached extras were pushed");
-        sendExtras(gCachedExtras);
-      }
-    }
-
-    /*
-     * serializes a bundle to JSON.
-     */
-    private static JSONObject convertBundleToJson(Bundle extras) {
-		try {
-			JSONObject json;
-			json = new JSONObject().put("event", "message");
-
-			JSONObject jsondata = new JSONObject();
-			Iterator<String> it = extras.keySet().iterator();
-			while (it.hasNext()) {
-				String key = it.next();
-				Object value = extras.get(key);
-
-				// System data from Android
-				if (key.equals("from") || key.equals("collapse_key")) {
+			// System data from Android
+			if (key.equals("from") || key.equals("collapse_key")) {
+				json.put(key, value);
+			} else if (key.equals("foreground")) {
+				json.put(key, extras.getBoolean("foreground"));
+			} else if (key.equals("coldstart")) {
+				json.put(key, extras.getBoolean("coldstart"));
+			} else {
+				// Maintain backwards compatibility
+				if (key.equals("message") || key.equals("msgcnt") || key.equals("soundname")) {
 					json.put(key, value);
-				} else if (key.equals("foreground")) {
-					json.put(key, extras.getBoolean("foreground"));
-				} else if (key.equals("coldstart")) {
-					json.put(key, extras.getBoolean("coldstart"));
-				} else {
-					// Maintain backwards compatibility
-					if (key.equals("message") || key.equals("msgcnt") || key.equals("soundname")) {
-						json.put(key, value);
-					}
+				}
 
-					if ( value instanceof String ) {
-					  // Try to figure out if the value is another JSON object
+				if ( value instanceof String ) {
+				  // Try to figure out if the value is another JSON object
 
-						String strValue = (String)value;
-						if (strValue.startsWith("{")) {
-							try {
-								JSONObject json2 = new JSONObject(strValue);
-								jsondata.put(key, json2);
-							}
-							catch (Exception e) {
-								jsondata.put(key, value);
-							}
-							// Try to figure out if the value is another JSON array
-						} else if (strValue.startsWith("[")) {
-							try {
-								JSONArray json2 = new JSONArray(strValue);
-								jsondata.put(key, json2);
-							} catch (Exception e) {
-								jsondata.put(key, value);
-							}
-						} else {
+					String strValue = (String)value;
+					if (strValue.startsWith("{")) {
+						try {
+							JSONObject json2 = new JSONObject(strValue);
+							jsondata.put(key, json2);
+						}
+						catch (Exception e) {
 							jsondata.put(key, value);
 						}
+						// Try to figure out if the value is another JSON array
+					} else if (strValue.startsWith("[")) {
+						try {
+							JSONArray json2 = new JSONArray(strValue);
+							jsondata.put(key, json2);
+						} catch (Exception e) {
+							jsondata.put(key, value);
+						}
+					} else {
+						jsondata.put(key, value);
 					}
 				}
-			} // while
-			json.put("payload", jsondata);
+			}
+		} // while
+		json.put("payload", jsondata);
 
-			Log.v(TAG, "extrasToJSON: " + json.toString());
+		Log.v(TAG, "extrasToJSON: " + json.toString());
 
-			return json;
-		} catch( JSONException e) {
-			Log.e(TAG, "extrasToJSON: JSON exception");
-		}
-		  return null;
-    }
+		return json;
+	} catch( JSONException e) {
+		Log.e(TAG, "extrasToJSON: JSON exception");
+	}
+	  return null;
+  }
 
-    public static boolean isInForeground() {
-      return gForeground;
-    }
+  public static boolean isInForeground() {
+    return gForeground;
+  }
 
-    public static boolean isActive() {
-    	return gWebView != null;
-    }
+  public static boolean isActive() {
+  	return gWebView != null;
+  }
 }
