@@ -45,7 +45,7 @@
 
 - (void)setECB:(CDVInvokedUrlCommand*)command;
 {
-    [self setupPluginWithCommand:command WithAction:@"setECB"];
+    [self setupPluginWithCommand:command withAction:@"setECB"];
 }
 
 - (void)register:(CDVInvokedUrlCommand*)command;
