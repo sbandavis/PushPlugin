@@ -109,8 +109,7 @@ public class PushPlugin extends CordovaPlugin {
 	 * Sends the pushbundle extras to the client application.
 	 * If the client application isn't currently active, it is cached for later processing.
 	 */
-	public static void sendExtras(Bundle extras)
-	{
+	public static void sendExtras(Bundle extras) {
 		if (extras != null) {
 			if (gECB != null && gWebView != null) {
 				sendJavascript(convertBundleToJson(extras));
@@ -123,72 +122,65 @@ public class PushPlugin extends CordovaPlugin {
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
-        super.initialize(cordova, webView);
-        gForeground = true;
+      super.initialize(cordova, webView);
+      gForeground = true;
     }
 
 	@Override
     public void onPause(boolean multitasking) {
-        super.onPause(multitasking);
-        gForeground = false;
-        //final NotificationManager notificationManager = (NotificationManager) cordova.getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-        //notificationManager.cancelAll();
+      super.onPause(multitasking);
+      gForeground = false;
+      //final NotificationManager notificationManager = (NotificationManager) cordova.getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+      //notificationManager.cancelAll();
     }
 
     @Override
     public void onResume(boolean multitasking) {
-        super.onResume(multitasking);
-        gForeground = true;
+      super.onResume(multitasking);
+      if ( gCachedExtras != null) {
+        sendExtras(gCachedExtras);
+        gCachedExtras = null;
+      }
+      gForeground = true;
     }
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
-        gForeground = false;
-		gECB = null;
-		gWebView = null;
+      super.onDestroy();
+      gForeground = false;
+      gECB = null;
+      gWebView = null;
     }
 
     /*
      * serializes a bundle to JSON.
      */
-    private static JSONObject convertBundleToJson(Bundle extras)
-    {
-		try
-		{
+    private static JSONObject convertBundleToJson(Bundle extras) {
+		try {
 			JSONObject json;
 			json = new JSONObject().put("event", "message");
 
 			JSONObject jsondata = new JSONObject();
 			Iterator<String> it = extras.keySet().iterator();
-			while (it.hasNext())
-			{
+			while (it.hasNext()) {
 				String key = it.next();
 				Object value = extras.get(key);
 
 				// System data from Android
-				if (key.equals("from") || key.equals("collapse_key"))
-				{
+				if (key.equals("from") || key.equals("collapse_key")) {
 					json.put(key, value);
-				}
-				else if (key.equals("foreground"))
-				{
+				} else if (key.equals("foreground")) {
 					json.put(key, extras.getBoolean("foreground"));
-				}
-				else if (key.equals("coldstart"))
-				{
+				} else if (key.equals("coldstart")) {
 					json.put(key, extras.getBoolean("coldstart"));
-				}
-				else
-				{
+				} else {
 					// Maintain backwards compatibility
-					if (key.equals("message") || key.equals("msgcnt") || key.equals("soundname"))
-					{
+					if (key.equals("message") || key.equals("msgcnt") || key.equals("soundname")) {
 						json.put(key, value);
 					}
 
 					if ( value instanceof String ) {
-					// Try to figure out if the value is another JSON object
+					  // Try to figure out if the value is another JSON object
 
 						String strValue = (String)value;
 						if (strValue.startsWith("{")) {
@@ -200,21 +192,14 @@ public class PushPlugin extends CordovaPlugin {
 								jsondata.put(key, value);
 							}
 							// Try to figure out if the value is another JSON array
-						}
-						else if (strValue.startsWith("["))
-						{
-							try
-							{
+						} else if (strValue.startsWith("[")) {
+							try {
 								JSONArray json2 = new JSONArray(strValue);
 								jsondata.put(key, json2);
-							}
-							catch (Exception e)
-							{
+							} catch (Exception e) {
 								jsondata.put(key, value);
 							}
-						}
-						else
-						{
+						} else {
 							jsondata.put(key, value);
 						}
 					}
@@ -225,21 +210,17 @@ public class PushPlugin extends CordovaPlugin {
 			Log.v(TAG, "extrasToJSON: " + json.toString());
 
 			return json;
-		}
-		catch( JSONException e)
-		{
+		} catch( JSONException e) {
 			Log.e(TAG, "extrasToJSON: JSON exception");
 		}
-		return null;
+		  return null;
     }
 
-    public static boolean isInForeground()
-    {
+    public static boolean isInForeground() {
       return gForeground;
     }
 
-    public static boolean isActive()
-    {
+    public static boolean isActive() {
     	return gWebView != null;
     }
 }
