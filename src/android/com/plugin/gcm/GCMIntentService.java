@@ -32,8 +32,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 		JSONObject json;
 
-		try
-		{
+		try {
 			json = new JSONObject().put("event", "registered");
 			json.put("regid", regId);
 
@@ -43,9 +42,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 			// In this case this is the registration ID
 			PushPlugin.sendJavascript( json );
 
-		}
-		catch( JSONException e)
-		{
+		} catch( JSONException e) {
 			// No message to the user is sent, JSON failed
 			Log.e(TAG, "onRegistered: JSON exception");
 		}
@@ -56,21 +53,23 @@ public class GCMIntentService extends GCMBaseIntentService {
 		Log.d(TAG, "onUnregistered - regId: " + regId);
 	}
 
-	@Override
-	protected void onMessage(Context context, Intent intent) {
-		Log.d(TAG, "onMessage - context: " + context);
+  @Override
+  protected void onMessage(Context context, Intent intent) {
+    Log.d(TAG, "onMessage - context: " + context);
 
-		// Extract the payload from the message
-		Bundle extras = intent.getExtras();
-		if (extras != null) {
-			// if we are in the foreground, just surface the payload, else post it to the statusbar
+    // Extract the payload from the message
+    Bundle extras = intent.getExtras();
+    if (extras != null) {
+      // if we are in the foreground, just surface the payload, else post it to the statusbar
       if (PushPlugin.isInForeground()) {
+        Log.d(TAG, "onMessage - pushing extras because we're in the foreground");
         extras.putBoolean("foreground", true);
         PushPlugin.sendExtras(extras);
       } else {
         extras.putBoolean("foreground", false);
         // Send a notification if there is a message
         if (extras.getString("message") != null && extras.getString("message").length() != 0) {
+          Log.d(TAG, "onMessage - create notification because we're in the background");
           createNotification(context, extras);
           //PushPlugin.sendExtras(extras); uncomment for the ecb to fire even if the app is not in foreground
         }
@@ -78,8 +77,7 @@ public class GCMIntentService extends GCMBaseIntentService {
     }
 	}
 
-	public void createNotification(Context context, Bundle extras)
-	{
+	public void createNotification(Context context, Bundle extras) {
 		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		String appName = getAppName(this);
 

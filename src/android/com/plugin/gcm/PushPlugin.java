@@ -112,7 +112,9 @@ public class PushPlugin extends CordovaPlugin {
 	public static void sendExtras(Bundle extras) {
 		if (extras != null) {
 			if (gECB != null && gWebView != null) {
+				Log.v(TAG, "sendExtras: pushing message to javascript");
 				sendJavascript(convertBundleToJson(extras));
+				gCachedExtras = null;
 			} else {
 				Log.v(TAG, "sendExtras: caching extras to send at a later time.");
 				gCachedExtras = extras;
@@ -123,12 +125,15 @@ public class PushPlugin extends CordovaPlugin {
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
       super.initialize(cordova, webView);
+      Log.v(TAG, "initialize: initialize was fired");
+      pushCachedExtras();
       gForeground = true;
     }
 
 	@Override
     public void onPause(boolean multitasking) {
       super.onPause(multitasking);
+      Log.v(TAG, "onPause: pause was fired");
       gForeground = false;
       //final NotificationManager notificationManager = (NotificationManager) cordova.getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
       //notificationManager.cancelAll();
@@ -136,20 +141,26 @@ public class PushPlugin extends CordovaPlugin {
 
     @Override
     public void onResume(boolean multitasking) {
+      Log.v(TAG, "onResume: resume was fired");
       super.onResume(multitasking);
-      if ( gCachedExtras != null) {
-        sendExtras(gCachedExtras);
-        gCachedExtras = null;
-      }
+      pushCachedExtras();
       gForeground = true;
     }
 
     @Override
     public void onDestroy() {
       super.onDestroy();
+      Log.v(TAG, "onDestroy: destroy was fired");
       gForeground = false;
       gECB = null;
       gWebView = null;
+    }
+
+    private void pushCachedExtras() {
+      if ( gCachedExtras != null) {
+        Log.v(TAG, "pushCachedExtras: cached extras were pushed");
+        sendExtras(gCachedExtras);
+      }
     }
 
     /*

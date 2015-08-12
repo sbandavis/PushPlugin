@@ -29,6 +29,7 @@ public class PushHandlerActivity extends Activity
     finish();
 
     if (!isPushPluginActive) {
+      Log.v(TAG, "onCreate - reloading main activity because main activity was not active");
       forceMainActivityReload();
     }
   }
@@ -45,7 +46,7 @@ public class PushHandlerActivity extends Activity
 
       originalExtras.putBoolean("foreground", false);
       originalExtras.putBoolean("coldstart", !isPushPluginActive);
-
+      Log.v(TAG, "processPushBundle - pushing extras");
       PushPlugin.sendExtras(originalExtras);
     }
   }
