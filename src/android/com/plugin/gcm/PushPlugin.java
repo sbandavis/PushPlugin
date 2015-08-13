@@ -113,7 +113,7 @@ public class PushPlugin extends CordovaPlugin {
             Log.d(TAG, "Heartbeat for GCM");
             handler.postDelayed(this, delay);
         }
-      }, delay);
+      });
       heartbeatStarted = true;
     }
   }
