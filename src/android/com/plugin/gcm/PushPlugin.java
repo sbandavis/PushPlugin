@@ -2,7 +2,9 @@ package com.plugin.gcm;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import com.google.android.gcm.GCMRegistrar;
 import org.apache.cordova.CallbackContext;
@@ -14,24 +16,26 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
+import java.lang.Runnable;
 
 /**
  * @author awysocki
  */
 
 public class PushPlugin extends CordovaPlugin {
-	public static final String TAG = "PushPlugin";
+  public static final String TAG = "PushPlugin";
 
-	public static final String REGISTER = "register";
-	public static final String UNREGISTER = "unregister";
-	public static final String SETECB = "setECB";
-	public static final String EXIT = "exit";
+  public static final String REGISTER = "register";
+  public static final String UNREGISTER = "unregister";
+  public static final String SETECB = "setECB";
+  public static final String EXIT = "exit";
 
-	private static CordovaWebView gWebView;
-	private static String gECB;
-	private static String gSenderID;
-	private static Bundle gCachedExtras = null;
-    private static boolean gForeground = false;
+  private static CordovaWebView gWebView;
+  private static String gECB;
+  private static String gSenderID;
+  private static Bundle gCachedExtras = null;
+  private static boolean gForeground = false;
+  private static boolean heartbeatStarted = false;
 
 	/**
 	 * Gets the application context from cordova's main activity.
@@ -79,7 +83,7 @@ public class PushPlugin extends CordovaPlugin {
 				sendExtras(gCachedExtras);
 				gCachedExtras = null;
 			}
-
+      startHeartbeat();
 		} else if (UNREGISTER.equals(action)) {
 
 			GCMRegistrar.unregister(getApplicationContext());
@@ -92,9 +96,27 @@ public class PushPlugin extends CordovaPlugin {
 			Log.e(TAG, "Invalid action : " + action);
 			callbackContext.error("Invalid action : " + action);
 		}
-
 		return result;
 	}
+
+  public void startHeartbeat() {
+    if (!heartbeatStarted) {
+      final int delay = 300000; // 5 minutes
+      final PushPlugin self = this;
+      final Handler handler = new Handler();
+      handler.post(new Runnable() {
+        @Override
+        public void run() {
+            Context context = self.getApplicationContext();
+            context.sendBroadcast(new Intent("com.google.android.intent.action.GTALK_HEARTBEAT"));
+            context.sendBroadcast(new Intent("com.google.android.intent.action.MCS_HEARTBEAT"));
+            Log.d(TAG, "Heartbeat for GCM");
+            handler.postDelayed(this, delay);
+        }
+      }, delay);
+      heartbeatStarted = true;
+    }
+  }
 
 	/*
 	 * Sends a json object to the client as parameter to a method which is defined in gECB.
