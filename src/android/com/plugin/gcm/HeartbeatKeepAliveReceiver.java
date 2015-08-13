@@ -11,7 +11,7 @@ import java.lang.System;
 
 public class HeartbeatKeepAliveReceiver extends BroadcastReceiver {
 
-  private boolean heartbeatStarted = true;
+  private boolean heartbeatStarted = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {
