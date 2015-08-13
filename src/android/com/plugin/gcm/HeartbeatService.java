@@ -1,5 +1,6 @@
 package com.plugin.gcm;
 
+import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;

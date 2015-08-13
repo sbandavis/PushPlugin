@@ -18,8 +18,8 @@ public class HeartbeatKeepAliveReceiver extends BroadcastReceiver {
       if (!heartbeatStarted) {
         Log.d("HeartbeatKeepAliveReceiver", "Heartbeat keep alive trigger received");
         int delay = 300000; // 5 minutes
-        Intent intent = new Intent(context, HeartbeatService.class);
-        PendingIntent sender = PendingIntent.getService(context, 0, intent, 0);
+        Intent i = new Intent(context, HeartbeatService.class);
+        PendingIntent sender = PendingIntent.getService(context, 0, i, 0);
 
         // We want the alarm to go off 2 seconds from now.
         long firstTime = System.currentTimeMillis() + 2 * 1000;

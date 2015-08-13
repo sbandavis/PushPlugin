@@ -97,7 +97,7 @@ public class PushPlugin extends CordovaPlugin {
 		return result;
 	}
 
-  public static void startHeartbeat() {
+  public void startHeartbeat() {
     if (!heartbeatStarted) {
       Intent intent = new Intent();
       intent.setAction("com.plugin.mostlyepic.gcm.HeartbeatKeepAlive");
