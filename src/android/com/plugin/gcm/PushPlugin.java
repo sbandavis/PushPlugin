@@ -4,7 +4,6 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import com.google.android.gcm.GCMRegistrar;
 import org.apache.cordova.CallbackContext;
@@ -16,7 +15,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Iterator;
-import java.lang.Runnable;
 
 /**
  * @author awysocki
@@ -99,22 +97,11 @@ public class PushPlugin extends CordovaPlugin {
 		return result;
 	}
 
-  public void startHeartbeat() {
+  public static void startHeartbeat() {
     if (!heartbeatStarted) {
-      final int delay = 300000; // 5 minutes
-      final PushPlugin self = this;
-      final Handler handler = new Handler();
-      handler.post(new Runnable() {
-        @Override
-        public void run() {
-            Context context = self.getApplicationContext();
-            context.sendBroadcast(new Intent("com.google.android.intent.action.GTALK_HEARTBEAT"));
-            context.sendBroadcast(new Intent("com.google.android.intent.action.MCS_HEARTBEAT"));
-            Log.d(TAG, "Heartbeat for GCM");
-            handler.postDelayed(this, delay);
-        }
-      });
-      heartbeatStarted = true;
+      Intent intent = new Intent();
+      intent.setAction("com.plugin.mostlyepic.gcm.HeartbeatKeepAlive");
+      getApplicationContext().sendBroadcast(intent);
     }
   }
 
