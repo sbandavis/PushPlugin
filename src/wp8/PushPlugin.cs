@@ -82,7 +82,11 @@ namespace WPCordovaClassLib.Cordova.Commands
             ShellToast toast;
             if (!TryDeserializeOptions(options, out toast))
             {
-                this.DispatchCommandResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
+                //this.DispatchCommandResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
+                toast = new ShellToast();
+                toast.Title = "Fehler";
+                toast.Content = "Content";
+                Deployment.Current.Dispatcher.BeginInvoke(toast.Show);
                 return;
             }
 
