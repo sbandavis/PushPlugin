@@ -80,7 +80,7 @@ namespace WPCordovaClassLib.Cordova.Commands
         public void showToastNotification(string options)
         {
             this.ExecuteCallback(this.pushOptions.ErrorCallback, JsonConvert.SerializeObject(options));
-        	
+        	/*
             ShellToast toast;
             if (!TryDeserializeOptions(options, out toast))
             {
@@ -88,7 +88,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                 return;
             }
 
-            Deployment.Current.Dispatcher.BeginInvoke(toast.Show);
+            Deployment.Current.Dispatcher.BeginInvoke(toast.Show);*/
         }
 
         void PushChannel_ChannelUriUpdated(object sender, NotificationChannelUriEventArgs e)
