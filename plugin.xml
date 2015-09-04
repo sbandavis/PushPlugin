@@ -162,6 +162,8 @@
 
     <source-file src="src/wp8/PushPlugin.cs" />
     <framework src="src/wp8/Newtonsoft.Json.dll" custom="true" />
+    <framework src="src/wp8/Windows.UI.dll" custom="true" />
+    <framework src="src/wp8/Windows.Networking.dll" custom="true" />
 
   </platform>
 
