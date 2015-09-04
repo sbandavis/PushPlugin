@@ -79,7 +79,7 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         public void showToastNotification(string options)
         {
-            this.ExecuteCallback(this.pushOptions.ErrorCallback, options);
+            this.ExecuteCallback(this.pushOptions.ErrorCallback, JsonConvert.SerializeObject(options));
         	
             ShellToast toast;
             if (!TryDeserializeOptions(options, out toast))
@@ -93,7 +93,7 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         void PushChannel_ChannelUriUpdated(object sender, NotificationChannelUriEventArgs e)
         {
-            this.ExecuteCallback(this.pushOptions.ErrorCallback, e);
+            this.ExecuteCallback(this.pushOptions.ErrorCallback, JsonConvert.SerializeObject(e));
             
             // return uri to js
             var result = new RegisterResult
@@ -117,7 +117,7 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         void PushChannel_ShellToastNotificationReceived(object sender, NotificationEventArgs e)
         {
-            this.ExecuteCallback(this.pushOptions.ErrorCallback, e);
+            this.ExecuteCallback(this.pushOptions.ErrorCallback, JsonConvert.SerializeObject(e));
             
             var toast = new PushNotification
             {
@@ -134,7 +134,7 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         void PushChannel_HttpNotificationReceived(object sender, HttpNotificationEventArgs e)
         {
-            this.ExecuteCallback(this.pushOptions.ErrorCallback, e);
+            this.ExecuteCallback(this.pushOptions.ErrorCallback, JsonConvert.SerializeObject(e));
             
             var raw = new PushNotification
             {
