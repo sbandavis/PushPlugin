@@ -157,7 +157,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                     {
                         try
                         {
-                            cView.Browser.InvokeScript("execScript", callback + "(" + callbackResult + ")");
+                            cView.Browser.InvokeScript("eval", callback + "(" + callbackResult + ")");
                         }
                         catch (Exception ex)
                         {
