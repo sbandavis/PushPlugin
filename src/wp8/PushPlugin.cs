@@ -79,14 +79,12 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         public void showToastNotification(string options)
         {
+            this.ExecuteCallback(this.pushOptions.ErrorCallback, options);
+        	
             ShellToast toast;
             if (!TryDeserializeOptions(options, out toast))
             {
-                //this.DispatchCommandResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
-                toast = new ShellToast();
-                toast.Title = "Fehler";
-                toast.Content = "Content";
-                Deployment.Current.Dispatcher.BeginInvoke(toast.Show);
+                this.DispatchCommandResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION));
                 return;
             }
 
@@ -95,6 +93,8 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         void PushChannel_ChannelUriUpdated(object sender, NotificationChannelUriEventArgs e)
         {
+            this.ExecuteCallback(this.pushOptions.ErrorCallback, e);
+            
             // return uri to js
             var result = new RegisterResult
             {
@@ -117,6 +117,8 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         void PushChannel_ShellToastNotificationReceived(object sender, NotificationEventArgs e)
         {
+            this.ExecuteCallback(this.pushOptions.ErrorCallback, e);
+            
             var toast = new PushNotification
             {
                 Type = "toast"
@@ -132,6 +134,8 @@ namespace WPCordovaClassLib.Cordova.Commands
 
         void PushChannel_HttpNotificationReceived(object sender, HttpNotificationEventArgs e)
         {
+            this.ExecuteCallback(this.pushOptions.ErrorCallback, e);
+            
             var raw = new PushNotification
             {
                 Type = "raw"
@@ -166,6 +170,7 @@ namespace WPCordovaClassLib.Cordova.Commands
                         catch (Exception ex)
                         {
                             Debug.WriteLine("ERROR: Exception in InvokeScriptCallback :: " + ex.Message);
+                            cView.Browser.InvokeScript("eval", callback + "(ERROR: Exception in InvokeScriptCallback : " + ex.Message + ")");
                         }
                     });
                 }
