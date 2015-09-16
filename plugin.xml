@@ -4,7 +4,7 @@
     xmlns:amazon="http://schemas.android.com/apk/lib/com.amazon.device.ads"
     xmlns:rim="http://www.blackberry.com/ns/widgets"
     id="de.andavis.plugins.PushPlugin"
-    version="1.1.1">
+    version="1.3.0">
 
   <name>PushPlugin</name>
 	<author>Stefan Bücherl, Kent Willis; orig. Bob Easterday.</author>
@@ -148,7 +148,7 @@
     </platform>
 
     <!-- wp8 -->
-    <platform name="wp8">
+    <!--<platform name="wp8">
 
     <config-file target="config.xml" parent="/*">
       <feature name="PushPlugin">
@@ -165,20 +165,20 @@
     <framework src="src/wp8/Windows.UI.dll" custom="true" />
     <framework src="src/wp8/Windows.Networking.dll" custom="true" />
 
-  </platform>
+  </platform>-->
 
   <!-- windows8 -->
-  <platform name="windows8">
+  <!--<platform name="windows8">
     <js-module src="src/windows/PushPluginProxy.js" name="PushPlugin">
       <merges target="" />
     </js-module>
-  </platform>
+  </platform>-->
 
   <!-- windows -->
-  <platform name="windows">
+  <!--<platform name="windows">
     <js-module src="src/windows/PushPluginProxy.js" name="PushPlugin">
       <merges target="" />
     </js-module>
-  </platform>
+  </platform>-->
 
 </plugin>
